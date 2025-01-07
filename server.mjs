@@ -1,22 +1,31 @@
 import express from 'express';
 import http from 'http';
 import { v4 } from 'uuid'; // for unique id
+import axios from "axios"
 import moment from 'moment';
 import "dotenv/config";
 
 const app = express();
 const uuid = v4();
 
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     const clientAddress = req.connection.remoteAddress;
     const clientPort = req.connection.remotePort;
     const clientId = uuid;
+
+    const client_address = clientAddress.replace("::ffff:", "")
+
+    const geoApiUrl = `http://ip-api.com/json/${client_address}`;
+    const geoResponse = await axios.get(geoApiUrl);
+
+    const { country, lat, lon } = geoResponse?.data || {};
 
     console.log("new client connected: ", {
         clientAddress: clientAddress.replace("::ffff:", ""),
         clientPort: clientPort,
         clientId: clientId,
     });
+
     res.send(`
 
     <!DOCTYPE html>
@@ -76,6 +85,9 @@ app.use((req, res, next) => {
         <p>ip address: ${clientAddress.replace("::ffff:", "")}</p>
         <p>port: ${clientPort}</p>
         <p>client_id: ${clientId}</p>
+        <p>country: ${country || "unknown"}</p>
+        <p>latitude: ${lat || "unknown"}</p>
+        <p>longitude: ${lon || "unknown"}</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
