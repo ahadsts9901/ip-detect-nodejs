@@ -118,7 +118,6 @@
 // server.listen(PORT, () => {
 //     console.log(`Server listening on port ${PORT}`);
 // });
-
 const express = require("express")
 
 const app = express();
@@ -127,7 +126,10 @@ app.set('trust proxy', true);
 
 app.get('/', (req, res) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    res.send(`Your public IP is: ${ip}`);
+    res.send({
+        message: "ip fetched",
+        ip: ip
+    });
 });
 
 app.listen(3000, '0.0.0.0');
